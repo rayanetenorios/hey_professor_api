@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Question;
 use App\Models\User;
 use App\Rules\WithQuestionMark;
 use Laravel\Sanctum\Sanctum;
@@ -60,6 +61,27 @@ describe('validation rules', function() {
         ])
             ->assertJsonValidationErrors([
                 'question' => 'The question should end with question mark (?).'
+            ]);
+    });
+
+    // colocar teste de quantidade de caracteres aqui
+
+    test('question should be unique', function() {
+        $user = User::factory()->create();
+
+        Question::factory()->create([
+            'question' => 'Lorem ipsun jeremias?', 
+            'status'   => 'draft',
+            'user_id'  => $user->id
+        ]);
+
+        Sanctum::actingAs($user);
+    
+        postJson(route('questions.store'), [
+            'question' => 'Lorem ipsun jeremias?',
+        ])
+            ->assertJsonValidationErrors([
+                'question' => 'already been taken'
             ]);
     });
 });
